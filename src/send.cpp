@@ -31,7 +31,7 @@ int main(int argc, char **argv)
         return -1;
     }
     unix_socket client;
-    client.getconnect();
+    client.getconnect(CLIENT);
     
     /* setting signal section */
 

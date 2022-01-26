@@ -19,6 +19,8 @@ struct package {
     double speed;
 };
 
+enum app_type { SERVER = 0, CLIENT = 1 };
+
 class unix_socket
 {
 private:
@@ -29,7 +31,7 @@ public:
     bool ok = true;;
     unix_socket();
     void stop();
-    void getconnect();
+    void getconnect(app_type type);
     void send_msgs(char *buf, int size);
     char *receive_msgs();
 };

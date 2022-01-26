@@ -23,19 +23,30 @@ unix_socket::unix_socket()
 	// }
 }
 
-void unix_socket::getconnect()
+void unix_socket::getconnect(app_type type)
 {
     if (this->ok) {
 		memset(&this->addr, 0, sizeof(this->addr));
 		addr.sun_family = AF_UNIX;
 		strcpy(addr.sun_path, SERVER_SOCK_FILE);
-        unlink(CLIENT_SOCK_FILE);
-		if (connect(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) == -1) {
-			perror("connect");
-			ok = 0;
-		} else {
-            std::cout << "get connection.\n";
+        if(SERVER == type) {
+            // unlink(SERVER_SOCK_FILE);
+            if (bind(this->sock, (struct sockaddr *) &this->addr, sizeof(this->addr)) < 0) {
+                perror("bind");
+                ok = 0;
+            } else {
+                std::cout << "get connection.\n";
+            }
         }
+        else if(CLIENT == type) {
+            if (connect(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) == -1) {
+                perror("connect");
+                ok = 0;
+            } else {
+                std::cout << "get connection.\n";
+            }
+        }
+		
 	}
 }
 
@@ -69,6 +80,8 @@ char *unix_socket::receive_msgs()
 void unix_socket::stop()
 {
     close(this->sock);
+    unlink(SERVER_SOCK_FILE);
+    unlink(CLIENT_SOCK_FILE);
     std::cout << "stop socket.\n";
 }
 

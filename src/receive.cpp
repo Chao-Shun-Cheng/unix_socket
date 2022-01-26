@@ -14,29 +14,28 @@ int main(int argc, char **argv)
         printf("Fail to app_setup_signals\n");
         return -1;
     }
-    unix_socket client;
-    client.getconnect();
+    unix_socket server;
+    server.getconnect(SERVER);
     
     /* setting signal section */
 
     ros::init(argc, argv, "unix_socket_receive");
     ros::NodeHandle n;
 
-    while(app_running && client.ok && ros::ok()) {
+    while(app_running && server.ok && ros::ok()) {
         printf("-----------------------\n");
-        char *data = client.receive_msgs();
+        char *data = server.receive_msgs();
         information = (package *) data;
         std::cout << "speed : " << information->speed << std::endl;
         free(information);
     }
-    client.stop();
+    server.stop();
     return 0;
 }
 
 void app_signal_handler(int sig_num)
 {
     app_running = false;
-    // client.stop();
 }
 
 int app_setup_signals()
