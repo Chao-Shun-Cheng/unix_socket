@@ -2,18 +2,18 @@
 
 unix_socket::unix_socket() 
 {
-    if ((sock = socket(PF_UNIX, SOCK_DGRAM, 0)) < 0) {
+    if ((this->sock = socket(PF_UNIX, SOCK_DGRAM, 0)) < 0) {
 		perror("socket");
-		ok = 0;
+		this->ok = 0;
 	} 
-    if (ok) {
-		memset(&addr, 0, sizeof(addr));
+    if (this->ok) {
+		memset(&this->addr, 0, sizeof(this->addr));
 		addr.sun_family = AF_UNIX;
 		strcpy(addr.sun_path, CLIENT_SOCK_FILE);
 		unlink(CLIENT_SOCK_FILE);
-		if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		if (bind(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) < 0) {
 			perror("bind");
-			ok = 0;
+			this->ok = 0;
 		} else {
             std::cout << "socket suceess\n";
         }
@@ -22,40 +22,39 @@ unix_socket::unix_socket()
 
 void unix_socket::getconnect()
 {
-    if (ok) {
-		memset(&addr, 0, sizeof(addr));
+    if (this->ok) {
+		memset(&this->addr, 0, sizeof(this->addr));
 		addr.sun_family = AF_UNIX;
 		strcpy(addr.sun_path, SERVER_SOCK_FILE);
-		if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+		if (connect(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) == -1) {
 			perror("connect");
-			ok = 0;
+			this->ok = 0;
 		} else {
             std::cout << "get connection.\n";
         }
 	}
 }
 
-void unix_socket::send_msgs(uint8_t *buf, int size)
+void unix_socket::send_msgs(char *buf, int size)
 {
-    if (ok) {
-		if (send(sock, (void*) buf, size, 0) == -1) {
+    if (this->ok) {
+		if (send(this->sock, buf, size, 0) == -1) {
 			perror("send");
-			ok = 0;
+			this->ok = 0;
 		}
 		printf ("sent message to dsrc\n");
 	}
 }
 
-uint8_t *unix_socket::receive_msgs()
+char *unix_socket::receive_msgs()
 {
-    if (ok) {
-        int len;
-        uint8_t *rx_buf = (uint8_t*) malloc(sizeof(uint8_t) * 1460);
-		if ((len = recv(sock, rx_buf, 1460, 0)) < 0) {
+    if (this->ok) {
+        char *rx_buf = (char *) malloc(sizeof(package));
+		if ((recv(this->sock, rx_buf, sizeof(package), 0)) < 0) {
 			perror("recv");
 			ok = 0;
 		} else {
-            printf ("receive message from dsrc\n", len);
+            printf ("receive message from dsrc\n");
             return rx_buf;
         }
 	} else {
@@ -65,6 +64,82 @@ uint8_t *unix_socket::receive_msgs()
 
 void unix_socket::stop()
 {
-    close(sock);
+    close(this->sock);
     std::cout << "stop socket.\n";
+}
+
+uint8_t* tool::float2uint8_t(float *data, int size)
+{
+	uint8_t *result = (uint8_t *) malloc(size * sizeof(float));
+
+    if (!result) {                                                           
+        perror("Failed to allocate an array\n");   
+        if (result)                             
+            free(result);
+        return NULL;                                                                           
+    }
+
+    memcpy(result, data, size * sizeof(float));
+    return result;
+}
+
+uint8_t* tool::double2uint8_t(double *data, int size)
+{
+	uint8_t *result = (uint8_t *) malloc(size * sizeof(double));
+
+    if (!result) {                                                           
+        perror("Failed to allocate an array\n");   
+        if (result)                             
+            free(result);
+        return NULL;                                                                           
+    }
+
+    memcpy(result, data, size * sizeof(double));
+    return result;
+}
+
+float* tool::uint8_t2float(uint8_t *data, size_t size)
+{
+    float *result = (float *) malloc(size);
+    
+    if (!result) {                                                           
+        perror("Failed to allocate a float array\n");   
+        if (result)                             
+            free(result);
+        return NULL;                                                                           
+    }
+
+    memcpy(result, data, size);
+    return result;
+}
+
+double* tool::uint8_t2double(uint8_t *data, size_t size)
+{
+    double *result = (double *) malloc(size);
+    
+    if (!result) {                                                           
+        perror("Failed to allocate a double array\n");   
+        if (result)                             
+            free(result);
+        return NULL;                                                                           
+    }
+
+    memcpy(result, data, size);
+    return result;
+}
+
+char* tool::package2char(package *data)
+{
+    char *result = (char *) malloc(sizeof(package) + 1);
+    
+    if (!result) {                                                           
+        perror("Failed to allocate a char array\n");   
+        if (result)                             
+            free(result);
+        return NULL;                                                                           
+    }
+
+    memcpy(result, data, sizeof(package));
+    result[sizeof(package)] = '\0';
+    return result;
 }
