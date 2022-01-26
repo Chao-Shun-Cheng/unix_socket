@@ -2,22 +2,25 @@
 
 unix_socket::unix_socket() 
 {
-    if ((this->sock = socket(PF_UNIX, SOCK_DGRAM, 0)) < 0) {
+    this->sock = socket(PF_UNIX, SOCK_DGRAM, 0);
+    if (this->sock < 0) {
 		perror("socket");
 		this->ok = 0;
-	} 
-    if (this->ok) {
-		memset(&this->addr, 0, sizeof(this->addr));
-		addr.sun_family = AF_UNIX;
-		strcpy(addr.sun_path, CLIENT_SOCK_FILE);
-		unlink(CLIENT_SOCK_FILE);
-		if (bind(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) < 0) {
-			perror("bind");
-			this->ok = 0;
-		} else {
-            std::cout << "socket suceess\n";
-        }
-	}
+	} else {
+        std::cout << "socket suceess\n";
+    }
+    // if (this->ok) {
+	// 	memset(&this->addr, 0, sizeof(this->addr));
+	// 	addr.sun_family = AF_UNIX;
+	// 	strcpy(addr.sun_path, CLIENT_SOCK_FILE);
+	// 	unlink(CLIENT_SOCK_FILE);
+	// 	if (bind(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) < 0) {
+	// 		perror("bind");
+	// 		this->ok = 0;
+	// 	} else {
+    //         std::cout << "socket suceess\n";
+    //     }
+	// }
 }
 
 void unix_socket::getconnect()
@@ -26,9 +29,10 @@ void unix_socket::getconnect()
 		memset(&this->addr, 0, sizeof(this->addr));
 		addr.sun_family = AF_UNIX;
 		strcpy(addr.sun_path, SERVER_SOCK_FILE);
+        unlink(CLIENT_SOCK_FILE);
 		if (connect(this->sock, (struct sockaddr *)&this->addr, sizeof(this->addr)) == -1) {
 			perror("connect");
-			this->ok = 0;
+			ok = 0;
 		} else {
             std::cout << "get connection.\n";
         }
@@ -42,7 +46,7 @@ void unix_socket::send_msgs(char *buf, int size)
 			perror("send");
 			this->ok = 0;
 		}
-		printf ("sent message to dsrc\n");
+		printf ("sent message to dsrc : %d\n", size);
 	}
 }
 
@@ -130,7 +134,7 @@ double* tool::uint8_t2double(uint8_t *data, size_t size)
 
 char* tool::package2char(package *data)
 {
-    char *result = (char *) malloc(sizeof(package) + 1);
+    char *result = (char *) malloc(sizeof(package));
     
     if (!result) {                                                           
         perror("Failed to allocate a char array\n");   
@@ -140,6 +144,6 @@ char* tool::package2char(package *data)
     }
 
     memcpy(result, data, sizeof(package));
-    result[sizeof(package)] = '\0';
+    
     return result;
 }

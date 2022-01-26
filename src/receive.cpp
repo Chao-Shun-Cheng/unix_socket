@@ -1,8 +1,7 @@
 #include "unix_socket/unix_socket.h"
 
+package *information;
 bool app_running = true;
-bool receive_pose = false;
-bool receive_can = false;
 char app_sigaltstack[SIGSTKSZ];
 void app_signal_handler(int sig_num);
 int app_setup_signals();
@@ -17,13 +16,18 @@ int main(int argc, char **argv)
     }
     unix_socket client;
     client.getconnect();
+    
     /* setting signal section */
 
     ros::init(argc, argv, "unix_socket_receive");
     ros::NodeHandle n;
-    
+
     while(app_running && client.ok && ros::ok()) {
-        package *data = (package *) client.receive_msgs();
+        printf("-----------------------\n");
+        char *data = client.receive_msgs();
+        information = (package *) data;
+        std::cout << "speed : " << information->speed << std::endl;
+        free(information);
     }
     client.stop();
     return 0;
@@ -32,6 +36,7 @@ int main(int argc, char **argv)
 void app_signal_handler(int sig_num)
 {
     app_running = false;
+    // client.stop();
 }
 
 int app_setup_signals()

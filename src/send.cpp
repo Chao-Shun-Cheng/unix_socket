@@ -32,6 +32,7 @@ int main(int argc, char **argv)
     }
     unix_socket client;
     client.getconnect();
+    
     /* setting signal section */
 
     ros::init(argc, argv, "unix_socket_send");
@@ -45,10 +46,11 @@ int main(int argc, char **argv)
     while(app_running && client.ok && ros::ok()) {
         ros::spinOnce();
         if(receive_can && receive_pose) {
+            printf("-----------------------\n");
             char *data = tool::package2char(&information);
             client.send_msgs(data, sizeof(information));
             free(data);
-        }
+        } 
         loop_rate.sleep();
     }
     client.stop();
@@ -58,6 +60,7 @@ int main(int argc, char **argv)
 void app_signal_handler(int sig_num)
 {
     app_running = false;
+    // client.stop();
 }
 
 int app_setup_signals()

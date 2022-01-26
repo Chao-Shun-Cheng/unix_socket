@@ -10,8 +10,8 @@
 #include "autoware_can_msgs/CANInfo.h"
 #ifndef IPC_H
 #define IPC_H
-#define CLIENT_SOCK_FILE "client.sock"
-#define SERVER_SOCK_FILE "server.sock"
+#define CLIENT_SOCK_FILE "/tmp/client.sock"
+#define SERVER_SOCK_FILE "/tmp/server.sock"
 #endif
 
 struct package {
@@ -26,7 +26,7 @@ private:
     struct sockaddr_un addr;
     
 public:
-    bool ok;
+    bool ok = true;;
     unix_socket();
     void stop();
     void getconnect();
