@@ -16,7 +16,6 @@ int main(int argc, char **argv)
     }
     unix_socket server;
     server.getconnect(SERVER);
-    
     /* setting signal section */
 
     ros::init(argc, argv, "unix_socket_receive");

@@ -35,13 +35,3 @@ public:
     void send_msgs(char *buf, int size);
     char *receive_msgs();
 };
-
-class tool
-{    
-public:
-    static uint8_t* float2uint8_t(float *data, int size);
-    static uint8_t* double2uint8_t(double *data, int size);
-    static float* uint8_t2float(uint8_t *data, size_t size);
-    static double* uint8_t2double(uint8_t *data, size_t size);
-    static char* package2char(package *data);
-};
