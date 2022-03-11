@@ -1,6 +1,7 @@
 #include "unix_socket/unix_socket.h"
 
 package *information;
+std_msgs::Float64 speed;
 bool app_running = true;
 char app_sigaltstack[SIGSTKSZ];
 void app_signal_handler(int sig_num);
@@ -20,12 +21,19 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "unix_socket_receive");
     ros::NodeHandle n;
+    ros::Publisher pub_pose = n.advertise<geometry_msgs::Pose>("leading_car_pose", 1);
+    ros::Publisher pub_velocity = n.advertise<std_msgs::Float64>("leading_car_velocity", 1);
 
     while(app_running && server.ok && ros::ok()) {
         printf("-----------------------\n");
         char *data = server.receive_msgs();
         information = (package *) data;
-        std::cout << "speed : " << information->speed << std::endl;
+        
+        printf("Frame : %d\n", information->count);
+        pub_pose.publish(information->vehicle_pose);
+        speed.data = information->velocity;
+        pub_velocity.publish(speed);
+
         free(information);
     }
     server.stop();

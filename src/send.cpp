@@ -8,17 +8,57 @@ char app_sigaltstack[SIGSTKSZ];
 void app_signal_handler(int sig_num);
 int app_setup_signals();
 
+tf::StampedTransform ndt2map;
+
+/**
+  * This function can transform pose from local frame to map frame.
+**/
+geometry_msgs::Pose getTransformedPose(const geometry_msgs::Pose &in_pose, const tf::StampedTransform &tf_stamp)
+{
+    tf::Transform transform;
+    geometry_msgs::PoseStamped out_pose;
+    transform.setOrigin(tf::Vector3(in_pose.position.x, in_pose.position.y, in_pose.position.z));
+    transform.setRotation(tf::Quaternion(in_pose.orientation.x, in_pose.orientation.y, in_pose.orientation.z, in_pose.orientation.w));
+    geometry_msgs::PoseStamped pose_out;
+    tf::poseTFToMsg(tf_stamp * transform, out_pose.pose);
+    return out_pose.pose;
+}
+
+/**
+  * This function can find the transformation matrix from local frame to map frame.
+  * local2global_ will save the matrix including translation and rotation.
+**/
+bool updateNecessaryTransform(const std::string &input, tf::StampedTransform &local2global_)
+{
+    bool success = true;
+    tf::TransformListener tf_listener_;
+    try {
+        tf_listener_.waitForTransform(input, "world", ros::Time(0), ros::Duration(1.0));
+        tf_listener_.lookupTransform("world", input, ros::Time(0), local2global_);
+    } catch (tf::TransformException ex)  // check TF
+    {
+        ROS_ERROR("%s", ex.what());
+        success = false;
+    }
+    return success;
+}
+
 void ndt_callback(const geometry_msgs::PoseStamped &input)
 {
+    bool success = updateNecessaryTransform(input.header.frame_id, ndt2map);
+    if (!success) {
+        ROS_INFO("Could not find coordiante transformation for NDT Pose");
+        return;
+    }
+    information.vehicle_pose = getTransformedPose(input.pose, ndt2map);
     receive_pose = true;
-    information.vehicle_pose = input;
     return;
 }
 
 void caninfo_callback(const autoware_can_msgs::CANInfo &input)
 {
+    information.velocity = input.speed;
     receive_can = true;
-    information.speed = input.speed;
     return;
 }
 
@@ -46,9 +86,11 @@ int main(int argc, char **argv)
         ros::spinOnce();
         if(receive_can && receive_pose) {
             printf("-----------------------\n");
+            printf("Frame : %d\n", information.count++);
             char *data = (char *) &information;
             client.send_msgs(data, sizeof(package));
         } 
+        receive_can = receive_pose = false;
         loop_rate.sleep();
     }
     client.stop();
@@ -90,3 +132,4 @@ int app_setup_signals()
 END:
     return ret;
 }
+

@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <sys/un.h>
 #include <ros/ros.h>
-
+#include <tf/transform_listener.h>
+#include <std_msgs/Float64.h>
 #include "autoware_msgs/DetectedObject.h"
 #include "autoware_msgs/DetectedObjectArray.h"
 #include "autoware_can_msgs/CANInfo.h"
@@ -15,8 +16,9 @@
 #endif
 
 struct package {
-    geometry_msgs::PoseStamped vehicle_pose;
-    double speed;
+    int count;
+    geometry_msgs::Pose vehicle_pose;
+    double velocity;
 };
 
 enum app_type { SERVER = 0, CLIENT = 1 };
@@ -35,3 +37,4 @@ public:
     void send_msgs(char *buf, int size);
     char *receive_msgs();
 };
+

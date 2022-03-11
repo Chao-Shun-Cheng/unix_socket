@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   message_generation
+  tf
+  std_msgs
 )
 
 add_message_files(
@@ -20,7 +22,7 @@ generate_messages(
 )
 
 catkin_package(
-   CATKIN_DEPENDS autoware_msgs roscpp rospy message_runtime autoware_can_msgs
+   CATKIN_DEPENDS autoware_msgs roscpp rospy message_runtime autoware_can_msgs tf std_msgs
 )
 
 include_directories(
