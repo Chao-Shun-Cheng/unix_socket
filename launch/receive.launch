@@ -1,0 +1,12 @@
+<!-- -->
+<launch>
+
+  <node pkg="unix_socket" type="unix_socket_receive" name="unix_socket_receive" output="screen"/>   
+
+  <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="leading_car_visualization"
+          output="screen" ns="leading_car/">
+      <param name="objects_src_topic" value="/objects"/>
+      <rosparam param="box_color">[255.,0.,0.,0.8]</rosparam>
+  </node>
+
+</launch>

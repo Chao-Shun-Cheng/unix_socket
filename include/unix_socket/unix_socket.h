@@ -5,7 +5,7 @@
 #include <sys/un.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float32.h>
 #include "autoware_msgs/DetectedObject.h"
 #include "autoware_msgs/DetectedObjectArray.h"
 #include "autoware_can_msgs/CANInfo.h"
@@ -19,6 +19,7 @@ struct package {
     int count;
     geometry_msgs::Pose vehicle_pose;
     double velocity;
+    double throttle;
 };
 
 enum app_type { SERVER = 0, CLIENT = 1 };

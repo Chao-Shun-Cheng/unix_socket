@@ -58,6 +58,7 @@ void ndt_callback(const geometry_msgs::PoseStamped &input)
 void caninfo_callback(const autoware_can_msgs::CANInfo &input)
 {
     information.velocity = input.speed;
+    information.throttle = input.drivepedal;
     receive_can = true;
     return;
 }
